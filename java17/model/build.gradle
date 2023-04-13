@@ -36,10 +36,9 @@ repositories {
 }
 
 
-
 publishing {
     publications {
-        myLibrary(MavenPublication) {
+        myLibrary(org.gradle.api.publish.maven.MavenPublication) {
             from components.java
         }
     }
@@ -52,9 +51,20 @@ publishing {
     }
 }
 
-tasks.named('jar') {
+jar{
     manifest {
         attributes('Implementation-Title': project.name,
                 'Implementation-Version': project.version)
     }
+
+    destinationDirectory = file("$rootDir/build/libs")
 }
+task x2jar(type: Jar) {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
+    from sourceSets.main.output
+    destinationDirectory = file("../../../template/java17/libs")
+}
+assemble.dependsOn(x2jar)
