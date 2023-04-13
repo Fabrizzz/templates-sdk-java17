@@ -7,10 +7,16 @@ import java.util.Map;
 
 public interface IRequest {
     String getBody();
+
     Map<String, String> getHeaders();
+
     String getHeader(String key);
+
     String getQueryRaw();
+
     Map<String, String> getQuery();
+
     String getPathRaw();
+
     Map<String, String> getPath();
 }

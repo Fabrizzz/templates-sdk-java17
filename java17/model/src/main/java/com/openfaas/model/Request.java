@@ -3,16 +3,16 @@
 
 package com.openfaas.model;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.net.URLDecoder;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Request implements IRequest {
 
-    private Map<String, String> headers;
-    private String body;
+    private final Map<String, String> headers;
+    private final String body;
     private Map<String, String> queryParameters;
     private String queryRaw;
     private String pathRaw;
@@ -22,8 +22,8 @@ public class Request implements IRequest {
         this.body = body;
         this.headers = headers;
     }
-    
-    public Request(String body, Map<String, String> headers,String queryRaw, String path) {
+
+    public Request(String body, Map<String, String> headers, String queryRaw, String path) {
         this.body = body;
         this.headers = headers;
         this.queryRaw = queryRaw;
@@ -41,21 +41,21 @@ public class Request implements IRequest {
     }
 
     public String getHeader(String key) {
-        if(!this.headers.containsKey(key)) {
+        if (!this.headers.containsKey(key)) {
             return null;
         }
 
         return this.headers.get(key);
     }
-    
-    @Override
-	public String getQueryRaw() {
-		return queryRaw;
-	}
 
     @Override
-	public Map<String, String> getQuery() {
-    	return queryParameters;
+    public String getQueryRaw() {
+        return queryRaw;
+    }
+
+    @Override
+    public Map<String, String> getQuery() {
+        return queryParameters;
     }
 
     @Override
@@ -69,9 +69,8 @@ public class Request implements IRequest {
     }
 
     private Map<String, String> parsePathParameters() {
-        Map<String, String> res = new HashMap<String, String>();
+        Map<String, String> res = new HashMap<>();
         if (pathRaw != null && pathRaw.length() > 0) {
-            String firstLetter = pathRaw.substring(0,1);
             String[] params = pathRaw.substring(1).split("/");
 
             String key = "";
@@ -83,39 +82,39 @@ public class Request implements IRequest {
                     key = param;
                 }
             }
-            if (key.length() > 0 ) {
+            if (key.length() > 0) {
                 res.put(key, "");
             }
         }
 
         return res;
     }
-    
-	private Map<String, String> parseQueryParameters() {
-		Map<String, String> reqParametersMap = new HashMap<String, String>();
-		if (queryRaw != null) {
-			String pairs[] = queryRaw.split("[&]");
 
-			for (String pair : pairs) {
-				String param[] = pair.split("[=]");
+    private Map<String, String> parseQueryParameters() {
+        Map<String, String> reqParametersMap = new HashMap<String, String>();
+        if (queryRaw != null) {
+            String[] pairs = queryRaw.split("&");
 
-				String key = null;
-				String value = null;
-				try {
-					if (param.length > 0) {
-						key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
-					}
+            for (String pair : pairs) {
+                String[] param = pair.split("=");
 
-					if (param.length > 1) {
-						value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
-					}
-					reqParametersMap.put(key, value);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return reqParametersMap;
-	}
+                String key = null;
+                String value = null;
+                try {
+                    if (param.length > 0) {
+                        key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
+                    }
+
+                    if (param.length > 1) {
+                        value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
+                    }
+                    reqParametersMap.put(key, value);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return reqParametersMap;
+    }
 
 }

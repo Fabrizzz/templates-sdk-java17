@@ -8,15 +8,15 @@ import java.util.Map;
 
 public class Response implements IResponse {
 
+    private final Map<String, String> headers;
     private int statusCode = 200;
     private String body;
     private String contentType;
-    private Map<String, String> headers;
 
     public Response() {
         this.body = "";
         this.contentType = "";
-        this.headers = new HashMap<String, String>();
+        this.headers = new HashMap<>();
     }
 
     public int getStatusCode() {
@@ -32,8 +32,8 @@ public class Response implements IResponse {
     }
 
     public void setHeader(String key, String value) {
-        if(value == null) {
-            if(this.headers.containsKey(key)) {
+        if (value == null) {
+            if (this.headers.containsKey(key)) {
                 this.headers.remove(key);
                 return;
             }
@@ -42,26 +42,26 @@ public class Response implements IResponse {
     }
 
     public String getHeader(String key) {
-        if(!this.headers.containsKey(key)) {
+        if (!this.headers.containsKey(key)) {
             return null;
         }
 
         return this.headers.get(key);
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
     public String getContentType() {
         return this.contentType;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getBody() {
         return this.body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }
