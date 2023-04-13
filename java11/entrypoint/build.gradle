@@ -1,99 +1,62 @@
+import org.gradle.api.JavaVersion
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 buildscript {
     group = 'com.openfaas'
-    version = '0.1.0'
+    version = '2.1.0'
 }
 
 plugins {
     id 'java'
     id 'application'
-    id 'maven'
-    id 'signing'
+    id 'maven-publish'
 }
-
-signing {
-    sign configurations.archives
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-mainClassName = 'App'
 
 dependencies {
-    compile 'com.google.guava:guava:23.0'
-    testCompile 'junit:junit:4.12'
-    compile 'com.openfaas:model:0.1.1'
+    implementation 'com.openfaas:model:2.1.1'
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withJavadocJar()
+    withSourcesJar()
 }
+
 
 repositories {
+    flatDir {
+        dirs '../model/build/libs'
+    }
     jcenter()
+}
 
-    flatDir {
-        dirs 'libs'
+
+application {
+    mainClass = 'com.openfaas.entrypoint.App'
+}
+
+publishing {
+    publications {
+        myLibrary(org.gradle.api.publish.maven.MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'myRepo'
+            url = layout.buildDirectory.dir("repo")
+        }
     }
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-uploadArchives {
-  repositories {
-    flatDir {
-        dirs 'repos'
+tasks.named('jar') {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version)
     }
-
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name 'OpenFaaS model'
-        packaging 'jar'
-        // optionally artifactId can be defined here 
-        description 'OpenFaaS Model for function invocations.'
-        url 'http://www.openfaas.com/'
-
-        scm {
-          connection 'scm:git:https://github.com/openfaas/templates'
-          developerConnection 'scm:git:https://github.com/openfaas/templates'
-          url 'https://github.com/openfaas/templates'
-        }
-
-        licenses {
-          license {
-            name 'MIT'
-            url 'https://opensource.org/licenses/MIT'
-          }
-        }
-
-        developers {
-          developer {
-            id 'openfaas'
-            name 'OpenFaaS Ltd'
-            email 'alex@openfaas.com'
-          }
-        }
-      }
-    }
-  }
 }
