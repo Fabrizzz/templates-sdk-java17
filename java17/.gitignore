@@ -1,7 +1,6 @@
 .project
 /entrypoint/build
 /entrypoint/.gradle
-/entrypoint/gradle
 /model/.gradle
 /model/build
 /.gradle
