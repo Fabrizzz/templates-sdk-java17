@@ -1,13 +1,11 @@
-buildscript {
-    group = 'com.openfaas'
-    version = '2.1.1'
-}
-
 plugins {
     id 'java-library'
     id 'maven-publish'
 }
 
+group = 'com.openfaas'
+archivesBaseName = 'model'
+version = '2.1.1'
 
 dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
@@ -21,9 +19,6 @@ dependencies {
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
@@ -32,21 +27,20 @@ java {
 
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 
 publishing {
     publications {
-        myLibrary(org.gradle.api.publish.maven.MavenPublication) {
+        myLibrary(MavenPublication) {
             from components.java
         }
     }
-
     repositories {
         maven {
-            name = 'myRepo'
-            url = layout.buildDirectory.dir("repo")
+            name = 'localrepo'
+            url = layout.buildDirectory.dir("../../../../template/java17/localrepo")
         }
     }
 }
@@ -56,15 +50,4 @@ jar{
         attributes('Implementation-Title': project.name,
                 'Implementation-Version': project.version)
     }
-
-    destinationDirectory = file("$rootDir/build/libs")
 }
-task x2jar(type: Jar) {
-    manifest {
-        attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version)
-    }
-    from sourceSets.main.output
-    destinationDirectory = file("../../../template/java17/libs")
-}
-assemble.dependsOn(x2jar)
