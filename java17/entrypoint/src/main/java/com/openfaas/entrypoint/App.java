@@ -11,12 +11,14 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.eclipse.jetty.http.spi.JettyHttpServerProvider;
+import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,15 +26,12 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         int port = 8082;
-
+        HttpServer server = JettyHttpServerProvider.provider().createHttpServer(new InetSocketAddress(port), 0);
         HandlerProvider p = HandlerProvider.getInstance();
         IHandler handler = p.getHandler();
-
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         InvokeHandler invokeHandler = new InvokeHandler(handler);
 
         server.createContext("/", invokeHandler);
-        server.setExecutor(null); // creates a default executor
         server.start();
     }
 
@@ -44,25 +43,19 @@ public class App {
         }
 
         @Override
-        public void handle(HttpExchange t) throws IOException {
+        public void handle(HttpExchange exchange) throws IOException {
             String requestBody = "";
-            String method = t.getRequestMethod();
+            String method = exchange.getRequestMethod();
 
             if (method.equalsIgnoreCase("POST")) {
-                InputStream inputStream = t.getRequestBody();
-                ByteArrayOutputStream result = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputStream.read(buffer)) != -1) {
-                    result.write(buffer, 0, length);
-                }
-                // StandardCharsets.UTF_8.name() > JDK 7
-                requestBody = result.toString("UTF-8");
+                InputStream inputStream = exchange.getRequestBody();
+                requestBody = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                inputStream.close();
             }
 
             // System.out.println(requestBody);
-            Headers reqHeaders = t.getRequestHeaders();
-            Map<String, String> reqHeadersMap = new HashMap<String, String>();
+            Headers reqHeaders = exchange.getRequestHeaders();
+            Map<String, String> reqHeadersMap = new HashMap<>();
 
             for (Map.Entry<String, java.util.List<String>> header : reqHeaders.entrySet()) {
                 java.util.List<String> headerValues = header.getValue();
@@ -71,18 +64,14 @@ public class App {
                 }
             }
 
-            // for(Map.Entry<String, String> entry : reqHeadersMap.entrySet()) {
-            //     System.out.println("Req header " + entry.getKey() + " " + entry.getValue());
-            // }
-
-            IRequest req = new Request(requestBody, reqHeadersMap, t.getRequestURI().getRawQuery(), t.getRequestURI().getPath());
+            IRequest req = new Request(requestBody, reqHeadersMap, exchange.getRequestURI().getRawQuery(), exchange.getRequestURI().getPath());
 
             IResponse res = this.handler.Handle(req);
 
             String response = res.getBody();
-            byte[] bytesOut = response.getBytes("UTF-8");
+            byte[] bytesOut = response.getBytes(StandardCharsets.UTF_8);
 
-            Headers responseHeaders = t.getResponseHeaders();
+            Headers responseHeaders = exchange.getResponseHeaders();
             String contentType = res.getContentType();
             if (contentType.length() > 0) {
                 responseHeaders.set("Content-Type", contentType);
@@ -92,13 +81,13 @@ public class App {
                 responseHeaders.set(entry.getKey(), entry.getValue());
             }
 
-            t.sendResponseHeaders(res.getStatusCode(), bytesOut.length);
+            exchange.sendResponseHeaders(res.getStatusCode(), bytesOut.length);
 
-            OutputStream os = t.getResponseBody();
+            OutputStream os = exchange.getResponseBody();
             os.write(bytesOut);
             os.close();
 
-            System.out.println("Request / " + Integer.toString(bytesOut.length) + " bytes written.");
+            System.out.println("Request / " + bytesOut.length + " bytes written.");
         }
     }
 
