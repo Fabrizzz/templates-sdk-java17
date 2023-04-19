@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/java17/model" name="model">
+                <projects>
+                  <project path="$PROJECT_DIR$/java17/model" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/java17/entrypoint" />
+        <option name="gradleHome" value="/usr/share/java/gradle" />
+        <option name="gradleJvm" value="oracle-17" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/java17/entrypoint" />
+            <option value="$PROJECT_DIR$/java17/model" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/java17/model" />
+        <option name="gradleHome" value="/usr/share/java/gradle" />
+        <option name="gradleJvm" value="oracle-17" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/java17/model" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
