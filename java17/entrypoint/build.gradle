@@ -41,7 +41,7 @@ publishing {
     repositories {
         maven {
             name = 'localrepo'
-            url = layout.buildDirectory.dir("../../../../template/java17/localrepo")
+            url = layout.buildDirectory.dir("../../../../template/java17/function/libs")
         }
     }
 }

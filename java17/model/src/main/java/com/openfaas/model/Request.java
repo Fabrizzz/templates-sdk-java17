@@ -91,7 +91,7 @@ public class Request implements IRequest {
     }
 
     private Map<String, String> parseQueryParameters() {
-        Map<String, String> reqParametersMap = new HashMap<String, String>();
+        Map<String, String> reqParametersMap = new HashMap<>();
         if (queryRaw != null) {
             String[] pairs = queryRaw.split("&");
 
